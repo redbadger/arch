@@ -1,9 +1,7 @@
 require! {
   '../src/server'
-  bluebird: Promise
   fs
   path
-  util
 }
 
 describe "server" (_) ->
