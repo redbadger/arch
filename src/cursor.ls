@@ -112,6 +112,9 @@ Cursor.prototype.on-change = (cbk) ->
   @_root._listeners[key] ||= []
   @_root._listeners[key].push cbk
 
+Cursor.prototype.eq = (cur) ->
+  @raw! === cur.raw!
+
 module.exports = (data) ->
   if is-type 'Array', data
     array-cursor null, data, data.length, []
