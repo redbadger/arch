@@ -191,3 +191,20 @@ describe "cursor" (_) ->
 
       expect trace .to-equal [36, 36, 37, 37, 38, 38, 39, 39, 40, 40]
 
+  # This logic may change in the future once we establish how we'll handle cursor change propagation through application state.
+  # For now, it compares the equality of 2 cursors' raw data.
+  describe "equality" (_) ->
+    it "passes on two cursors with a shared tree and same data" ->
+      data1 = cursor raw-data
+      data2 = cursor raw-data
+      expect (data1.eq data2) .to-be true
+
+    it "passes on two subcursors with a shared tree and same data" ->
+      data1 = cursor raw-data .get \person.first_name
+      data2 = cursor raw-data .get \person.first_name
+      expect (data1.eq data2) .to-be true
+
+    it "fails on cursors with different data" ->
+      data1 = cursor raw-data .get \person.first_name
+      data2 = cursor raw-data .get \person.first_name .update -> \Billy
+      expect (data1.eq data2) .to-be false
