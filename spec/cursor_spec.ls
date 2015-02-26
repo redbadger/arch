@@ -206,5 +206,6 @@ describe "cursor" (_) ->
 
     it "fails on cursors with different data" ->
       data1 = cursor raw-data .get \person.first_name
-      data2 = cursor raw-data .get \person.first_name .update -> \Billy
+      data2 = cursor raw-data .get \person.first_name
+      data2.update -> \Billy
       expect (data1.eq data2) .to-be false
