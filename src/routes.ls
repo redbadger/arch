@@ -67,9 +67,6 @@ module.exports =
         load config.component, context, config.init
         window.scroll-to 0, 0
 
-        # call the route callback
-        config.init(app-state, context, ->) if config.init
-
     # only start client-side routing if pushState is available
     page.start! if (typeof window.history.replace-state isnt 'undefined')
     @running = true
