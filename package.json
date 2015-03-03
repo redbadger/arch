@@ -36,6 +36,7 @@
   },
   "dependencies": {
     "bluebird": "^2.3.11",
+    "deep-equal": "^1.0.0",
     "envify-loader": "^0.1.0",
     "body-parser": "^1.10.1",
     "express": "^4.10.6",
