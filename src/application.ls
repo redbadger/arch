@@ -18,15 +18,15 @@ module.exports =
 
         render: ->
           if @props.component then
-            React.create-element that.deref!, @props{state, context}
+            React.create-element that.deref!, @props{app-state, context}
           else
             span "Page not found."
 
       # Create an instance of the root component element
-      element: -> React.create-element @type, do
-        component: @state.get 'component'
-        context: @state.get 'context'
-        state: @state.get 'state'
+      element: (state = @state) -> React.create-element @type, do
+        component: state.get 'component'
+        context: state.get 'context'
+        app-state: state.get 'appState'
 
       # Mount the application to the root node
       mount: -> React.render @element!, @root
@@ -36,31 +36,37 @@ module.exports =
       initialise: (path=(location.pathname + location.search + location.hash)) ->
         new bluebird (res, rej) ~>
           # Load initial state (env dependent)
-          unless process.env.REFLEX_ENV is 'browser' and state = JSON.parse @root.get-attribute 'data-reflex-app-state'
-            state = config.get-initial-state! or {}
+          unless process.env.REFLEX_ENV is 'browser' and app-state = JSON.parse @root.get-attribute 'data-reflex-app-state'
+            app-state = config.get-initial-state! or {}
 
           # Resolve routes before getting into async stuff..
           [component, context, route-init] = routes.resolve path, @_routes
 
-          new bluebird (res, rej) -> (config.start or ((a, b) -> b a)) state, res
-          .then (state) ->
-            new bluebird (res, rej) -> (route-init or ((a, b) -> b a)) state, res
-            .then (state)
+          new bluebird (res, rej) ->
+            # Run app initialiser if it exists (asynchronously)
+            if config.start then config.start app-state, res else res app-state
+          .then (app-state) ->
+            # Then run route initialiser if it exists (asynchronously)
+            new bluebird (res, rej) ->
+              if route-init then route-init app-state, res else res app-state
+            .then (app-state) ->
               # And finally, send state and route data to be rendered/mounted/processed.
-              res cursor {state, component, context}
+              res cursor {app-state, component, context}
 
       # clientside loader
       start: ->
         @initialise!
         .then (state) ~>
           @state = state
-
           # Initialise clientside routing
           routes.start @_routes, (component, context, init) ~>
             # When a route changes, update the state to reflect the new route
-            @state.update (data) ->
-              data.state = init data.state if init
-              data import {component, context}
+            new bluebird (res, rej) ~>
+              state = @state.get 'appState' .deref!
+              if init then init state, res else res state
+            .then (app-state) ~>
+              @state.update (data) ->
+                data import {app-state, component, context}
 
           # Tell application to rerender on state change.
           @state.on-change ~>
@@ -75,20 +81,13 @@ module.exports =
         new bluebird (res, rej) ~>
           @initialise path
           .then (state) ~>
-            console.log state
-            return res [state.get 'state' .deref!, React.render-to-string @element!]
+            return res [state.get 'appState' .deref!, React.render-to-string @element state]
 
       # process a form from a particular route and render to string
       # returns a promise of [state, body, location]
       process-form: (path, post-data) ->
         new bluebird (res, rej) ~>
-          initial-state = cursor config.get-initial-state!
-
-          [route-component, context, route-init] = routes.resolve path, config.routes!
-          root-element = React.create-element @type, initial-state: initial-state, component: route-component, context: context
-
-        config.start initial-state, ->
-            return res server-rendering.process-form root-element, initial-state, post-data, path unless route-init
-
-            route-init initial-state, context, ->
-              res server-rendering.process-form root-element, initial-state, post-data, path
+          @initialise path
+          .then (state) ~>
+          @state = state
+          res server-rendering.process-form @element!, state, post-data, path
