@@ -8,10 +8,12 @@ exports.bundle = (options, on-change) ->
 
   # Deep-merge application config into reflex default config.
   try
-    file = fs.stat-sync path.join(options.paths.app.abs, 'webpack.config.js')
+    file = fs.stat-sync path.join(path.resolve(options.paths.app.abs), 'webpack.config.js')
     if file.is-file!
-      app-config = require path.join(options.paths.app.rel, 'webpack.config.js')
+      app-config = require path.join(options.paths.app.abs, 'webpack.config.js')
       config := deep-extend config, app-config
+  catch {message}
+    console.error message
 
   # Initialise the bundle
   bundler = webpack config
@@ -32,8 +34,8 @@ exports.bundle = (options, on-change) ->
       filename: 'app.js'
       content-base: path.join options.paths.app.abs, options.paths.public
       hot: true # Enable hot loading
-      quiet: true
-      no-info: true
+      quiet: !options.debug
+      no-info: !options.debug
       watch-delay: 200
 
     server.listen options.webpack-port, 'localhost'
