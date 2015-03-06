@@ -12,8 +12,6 @@ exports.bundle = (options, on-change) ->
     if file.is-file!
       app-config = require path.join(options.paths.app.abs, 'webpack.config.js')
       config := deep-extend config, app-config
-  catch {message}
-    console.error message
 
   # Initialise the bundle
   bundler = webpack config
