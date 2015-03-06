@@ -1,4 +1,4 @@
-require! <[ express fs path jade bluebird body-parser ./bundler ]>
+require! <[ express fs path jade bluebird body-parser ./bundler deep-extend ]>
 {each, values, filter, find, flatten, map, first} = require 'prelude-ls'
 
 __template = jade.compile-file (path.join __dirname, 'index.jade')
@@ -17,9 +17,11 @@ defaults =
       abs: path.dirname require.resolve "../package.json"
       rel: path.relative (path.resolve '.'), (path.dirname require.resolve "../package.json")
     public: 'dist'
+  watch: process.env.NODE_ENV isnt 'production'
+  webpack-port: 3001
 
 module.exports = (options={}) ->
-  options = defaults import options
+  options = deep-extend defaults, options
   options.dependencies |> each require
   app = options.app or require options.paths.app.rel
 
@@ -52,7 +54,7 @@ module.exports = (options={}) ->
     # .bundle takes a boolean of whether to watch and can take a callback which
     # allows you to hook into any watch changes.
 
-    bundler.bundle options.paths, options.environment is 'development', (ids) ->
+    bundler.bundle options, (ids) ->
       done = []
       while id = first ids
         parents = require.cache |> values |> filter (-> !(it.id in done) and it.children |> find (.id is id)) |> flatten |> map (.id)
@@ -67,12 +69,12 @@ module.exports = (options={}) ->
     if cb
       listener = server.listen options.port, (err) ->
         console.log 'App is listening on', listener.address!.port
-        cb err, { server: server, listener: listener }
+        cb err, { server: server, listener: listener, options: options }
     else
       new bluebird (res, rej) ->
         listener = server.listen options.port, ->
           console.log 'App is listening on', listener.address!.port
-          res server: server, listener: listener
+          res server: server, listener: listener, options: options
 
   /* test-exports */
   get: reflex-get
