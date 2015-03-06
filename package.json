@@ -36,8 +36,9 @@
   },
   "dependencies": {
     "bluebird": "^2.3.11",
-    "envify-loader": "^0.1.0",
     "body-parser": "^1.10.1",
+    "deep-extend": "^0.3.2",
+    "envify-loader": "^0.1.0",
     "express": "^4.10.6",
     "immutable": "^3.4.1",
     "jade": "^1.8.2",
