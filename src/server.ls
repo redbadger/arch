@@ -1,10 +1,11 @@
-require! <[ express fs path jade bluebird body-parser ./bundler LiveScript ]>
+require! <[ express fs path jade bluebird body-parser ./bundler ]>
 {each, values, filter, find, flatten, map, first} = require 'prelude-ls'
 
 __template = jade.compile-file (path.join __dirname, 'index.jade')
 read-file = bluebird.promisify fs.read-file
 
 defaults =
+  dependencies: []
   environment: process.env.NODE_ENV or 'development'
   port: 3000
   paths:
@@ -17,7 +18,9 @@ defaults =
       rel: path.relative (path.resolve '.'), (path.dirname require.resolve "../package.json")
     public: 'dist'
 
-module.exports = (options=defaults) ->
+module.exports = (options={}) ->
+  options = defaults import options
+  options.dependencies |> each require
   app = options.app or require options.paths.app.rel
 
   get = (req, res) ->
