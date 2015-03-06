@@ -1,4 +1,15 @@
 #!/usr/bin/env node
-var server = require('../lib/server');
-var app = server().start();
+var fs = require('fs');
+var path = require('path');
+var server;
 
+try {
+  var localServer = fs.statSync(path.join(path.resolve('.'), 'server.js'));
+  if (localServer.isFile()) {
+    server = require(path.join(path.resolve('.'), 'server.js'));
+  }
+}
+
+catch (e) {
+  server = require('../lib/server')().start();
+}
