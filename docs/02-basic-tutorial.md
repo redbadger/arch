@@ -336,7 +336,7 @@ You can imagine you can easily make the recent queries clickable to run them aga
 
 In the previous state we grew the “state update loop” from component local to application wide. But let’s say we want to make the search actually fetch results from a backend - say Github’s user search.
 
-First let’s think about what this means. We want to respond to the query change by issuing a request to Github API and when we get a results back (asynchronously), update the list of items. This is quite obviously not a job for a React component. The key feature of Reflex’s cursor that enables the behaviour is the cursors are **observable**
+First let’s think about what this means. We want to respond to the query change by issuing a request to Github API and when we get a results back (asynchronously), update the list of items. This is quite obviously not a job for a React component. The key feature of Reflex’s cursor that enables the behaviour is that cursors are **observable**.
 
 Let’s create a separate module that does what we need.
 
