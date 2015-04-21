@@ -77,8 +77,6 @@ Pages (route handlers) in Reflex are React components. They all share the same `
 * `app-state` - the application state (more on that later)
 * `context` - the parsed URL with parameters (route segments or query string)
 
-To learn more about routing, read the [routing guide]().
-
 ## LiveScript as template language
 
 The listing component code deserves a more detailed explanation. First, we don’t use JSX to define the DOM structure we’re rendering, we use pure LiveScript. Second, we use a thin wrapping layer provided by Reflex to make LiveScript a very nice markup language: Each component is a simple function taking its children as arguments - either separately or in an array. Optionally, the first argument is an object with props for the component. Behind the scenes Reflex uses `React.createElement` like JSX would.
