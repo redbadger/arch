@@ -106,7 +106,7 @@ Now we need to add some state handling to make it interactive
 matches = (query, item) -->
   item.index-of query > 0
 
-module.exports = reflex.create-component do
+module.exports = React.create-class do
   display-name: 'listing'
 
   get-initial-state: ->
