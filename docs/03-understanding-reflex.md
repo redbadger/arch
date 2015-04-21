@@ -1,6 +1,6 @@
 # Understanding Reflex
 
-Reflex is a web application framework for building the user interface layer of multi-layered web applications. The UI layer of Reflex is provided by React JS and Reflex supplies the rest of the architecture: routing, global state management and support for isomorphic rendering [rendering?], as well as some convenience helpers for the way we think React applications should be built.
+Reflex is a web application framework for building the user interface layer of multi-layered web applications. The UI layer of Reflex is provided by React JS and Reflex supplies the rest of the architecture: routing, global state management and support for isomorphic rendering, as well as some convenience helpers for the way we think React applications should be built.
 
 Reflex comes with a CLI to generate and run the applications conveniently, but also supports running a server without the CLI as a stand-alone server or part of a larger node.js application.
 
