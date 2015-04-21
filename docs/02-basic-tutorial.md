@@ -258,7 +258,7 @@ You might be thinking “so now we’ve made a couple things much more complicat
         @props.things |> map -> li it
 ```
 
-Everything works exactly as it did before, except our state is now central, which has countless benefits (see [Application as Data] for examples). Every time the state gets updated, the whole UI gets automatically re-rendered so we can see our changes (which isn’t nearly as expensive as it sounds partly through the magic of React, partly through optimisations Reflex itself does [will do]).
+Everything works exactly as it did before, except our state is now central, which has countless benefits (see [Application as Data](https://github.com/redbadger/reflex/blob/master/docs/05-application-as-data.md) for examples). Every time the state gets updated, the whole UI gets automatically re-rendered so we can see our changes (which isn’t nearly as expensive as it sounds partly through the magic of React, partly through optimisations Reflex itself does [will do]).
 
 When the user types into the field, we `update` the query value to the value of the event. The `update` method actually takes a callback, instead of just taking a new value.
 
