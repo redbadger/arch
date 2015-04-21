@@ -279,7 +279,7 @@ Let’s finally add the list of recent queries. First we need to keep track of t
             placeholder: 'Search things'
             value: @props.query.deref!
             on-keyup: (e) ~>
-              return unless e.name is ‘EnterKey` # CHECK THIS
+              return unless e.key is 13 # ENTER key
 
               @props.query.update -> q
               @props.queries.update -> it.unshift q
