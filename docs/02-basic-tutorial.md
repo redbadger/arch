@@ -262,7 +262,7 @@ Everything works exactly as it did before, except our state is now central, whic
 
 When the user types into the field, we `update` the query value to the value of the event. The `update` method actually takes a callback, instead of just taking a new value.
 
-In Reflex, the new state behind the cursor is a function of the state before the update. This lets you do in-place updates based on the previous value in a single call. (Arguably this is much less important in a single threaded application, but still has some benefits). You can learn more about how the Reflex cursor works in [Cursors over Immutable Data](06-cursors-and-immutables).
+In Reflex, the new state behind the cursor is a function of the state before the update. This lets you do in-place updates based on the previous value in a single call. (Arguably this is much less important in a single threaded application, but still has some benefits). You can learn more about how the Reflex cursor works in [Cursors over Immutable Data](https://github.com/redbadger/reflex/blob/master/docs/06-cursors-and-immutables.md).
 
 Let’s finally add the list of recent queries. First we need to keep track of them.
 
