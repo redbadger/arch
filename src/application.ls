@@ -1,5 +1,7 @@
-require! <[ bluebird ./cursor ./dom ./routes ./server-rendering ]>
+require! <[ bluebird ./cursor ./dom ./routes ./server-rendering cookie ]>
 require! './virtual-dom-utils': 'dom-utils'
+
+{keys, each, Obj} = require 'prelude-ls'
 
 {span} = dom
 
@@ -21,8 +23,8 @@ app-component = React.create-factory React.create-class do
       # FIXME make this user editable
       span "Page not found."
 
-init-app-state = (initial-state, route-context) ->
-  cursor state: initial-state, route: route-context
+init-app-state = (initial-state, route-context, cookies) ->
+  cursor state: initial-state, route: route-context, cookies: cookies
 
 observe-page-change = (root-tree, app-state) ->
   app-state.get \route .on-change (route) ->
@@ -41,6 +43,9 @@ observe-page-change = (root-tree, app-state) ->
         window.scroll-to 0, 0
     , 0
 
+parse-req-cookies = (cookies) ->
+  cookies |> Obj.map -> value: it
+
 module.exports =
   # define an application instance
   create: (app) ->
@@ -49,6 +54,7 @@ module.exports =
       start: ->
         route-set = app.routes!
         path = (location.pathname + location.search + location.hash)
+        client-cookies = parse-req-cookies cookie.parse(document.cookie)
 
         root-dom-node = document.get-element-by-id "application"
 
@@ -60,7 +66,7 @@ module.exports =
         app-state = if server-state
           cursor server-state
         else
-          init-app-state app.get-initial-state!, routes.resolve(route-set, path)
+          init-app-state app.get-initial-state!, routes.resolve(route-set, pathname), client-cookies
 
         # Boot the app
 
@@ -73,6 +79,15 @@ module.exports =
 
         # Whenever app state changes re-render
 
+        app-state.get 'cookies' .on-change (cookies) ->
+          cookies |> keys |> each (k) ->
+            c = if cookies[k] then cookies[k].value else cookies[k]
+            unless (client-cookies[k] && client-cookies[k].value === JSON.stringify c)
+              if (c is null or c is undefined)
+                document.cookie = cookie.serialize k, null, {expires: (new Date())}
+              else
+                document.cookie = cookie.serialize k, c, cookies[k].options
+
         app-state.on-change -> root.set-state app-state: app-state
 
         # Set up SPA navigation
@@ -82,15 +97,29 @@ module.exports =
 
       # render a particular route to string
       # returns a promise of [state, body]
-      render: (path) ->
+      render: (req, res) ->
+        path = req.original-url
         route-set = app.routes!
-        app-state = init-app-state app.get-initial-state!, routes.resolve(route-set, path)
+        client-cookies = parse-req-cookies req.cookies
+        app-state = init-app-state app.get-initial-state!, null, client-cookies
 
         transaction = app-state.start-transaction!
+
+        # send new cookies if they are modified during transaction
+
+        app-state.get 'cookies' .on-change (cookies) ->
+          cookies |> keys |> each (k) ->
+            c = if cookies[k] then cookies[k].value else cookies[k]
+            unless (client-cookies[k] && client-cookies[k].value === JSON.stringify c)
+              if (c is null or c is undefined)
+                res.clear-cookie k
+              else
+                res.cookie k, c, cookies[k].options
 
         # Boot the app
 
         app.start app-state
+        app-state.get 'route' .update -> routes.resolve(route-set, path)
         root-element = app-component app-state: app-state, routes: route-set
 
         app-state.end-transaction transaction
@@ -100,20 +129,34 @@ module.exports =
 
       # process a form from a particular route and render to string
       # returns a promise of [state, body, location]
-      process-form: (path, post-data) ->
+      process-form: (req, res) ->
+        path = req.original-url
+
+        client-cookies = parse-req-cookies req.cookies
+
         route-set = app.routes!
-        app-state = init-app-state app.get-initial-state!, routes.resolve(route-set, path)
+        app-state = init-app-state app.get-initial-state!, null, client-cookies
+
+        app-state.get 'cookies' .on-change (cookies) ->
+          cookies |> keys |> each (k) ->
+            c = if cookies[k] then cookies[k].value else cookies[k]
+            unless (client-cookies[k] && client-cookies[k].value === JSON.stringify c)
+              if (c is null or c is undefined)
+                res.clear-cookie k
+              else
+                res.cookie k, c, cookies[k].options
 
         transaction = app-state.start-transaction!
 
         # Boot the app
 
         app.start app-state
+        app-state.get 'route' .update -> routes.resolve(route-set, path)
         root-element = app-component app-state: app-state, routes: route-set
 
         # Process the form
 
-        location = server-rendering.process-form root-element, app-state, post-data, path
+        location = server-rendering.process-form root-element, app-state, req.body, path
 
         app-state.end-transaction transaction
         .then ->

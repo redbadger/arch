@@ -1,5 +1,7 @@
 test-utils = React.addons.TestUtils
 
+{filter, find, any} = require 'prelude-ls'
+
 extract-route = (tree) ->
   routes = test-utils.find-all-in-rendered-tree tree, ->
     return it.get-layout-template and typeof! it.get-layout-template is 'Function'

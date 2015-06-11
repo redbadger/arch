@@ -1,5 +1,5 @@
 dom-utils = require './virtual-dom-utils'
-{difference, filter, first, keys, Obj} = require 'prelude-ls'
+{difference, filter, first, keys, Obj, each} = require 'prelude-ls'
 
 ReactServerRenderingTransaction = require 'react/lib/ReactServerRenderingTransaction'
 ReactDefaultBatchingStrategy = require 'react/lib/ReactDefaultBatchingStrategy'
@@ -48,7 +48,7 @@ fake-event = (element, opts = {}) ->
 
 change-inputs = (inputs, post-data) ->
   inputs |> each ->
-    it.props.on-change (fake-event it, value: post-data[it.props.name])
+    it.props.on-change (fake-event it, value: post-data[it.props.name]) if it.props.on-change
     ReactUpdates.flushBatchedUpdates!
 
 submit-form = (form) ->

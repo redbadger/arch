@@ -1,4 +1,4 @@
-require! <[ express fs path jade bluebird body-parser ./bundler LiveScript babel/register ]>
+require! <[ express fs path jade bluebird body-parser ./bundler LiveScript babel/register cookie-parser ]>
 {each, values, filter, find, flatten, map, first} = require 'prelude-ls'
 
 defaults =
@@ -19,13 +19,13 @@ module.exports = (options) ->
 
   get = (req, res) ->
     console.log "GET", req.original-url
-    arch-get app, req.original-url, options
+    arch-get app, req, res, options
     .spread (status, headers, body) ->
       res.status status .set headers .send body
 
   post = (req, res) ->
     console.log "POST", req.original-url, req.body
-    arch-post app, req.original-url, req.body, options
+    arch-post app, req, res, options
     .spread (status, headers, body) ->
       res.status status .set headers .send body
 
@@ -33,6 +33,7 @@ module.exports = (options) ->
     server = express!
     .use "/#{options.paths.public}", express.static path.join(options.paths.app.abs, options.paths.public)
     .use body-parser.urlencoded extended: false
+    .use cookie-parser!
     .get '*', get
     .post '*', post
 
@@ -71,14 +72,14 @@ module.exports = (options) ->
   render: layout-render
   /* end-test-exports */
 
-arch-get = (app, url, options) ->
-  app.render url
+arch-get = (app, req, res, options) ->
+  app.render req, res
   .spread (meta, app-state, body) ->
     html = layout-render meta, body, app-state, options
     [200, {}, html]
 
-arch-post = (app, url, post-data, options) ->
-  app.process-form url, post-data
+arch-post = (app, req, res, options) ->
+  app.process-form req, res
   .spread (meta, app-state, body, location) ->
     # FIXME build a full URL for location to comply with HTTP
     return [302, 'Location': location, ""] unless body

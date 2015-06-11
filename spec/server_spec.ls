@@ -19,13 +19,13 @@ describe "server" (_) ->
       inst := server app: app
 
     it "passes through to application's server rendering" !->
-      inst.get app, 'url', paths: { public: 'dist' }
+      inst.get app, {original-url: 'url', cookies:{}}, {}, paths: { public: 'dist' }
       # Test that the method that renders a route to a string has been called
       # with a URL an anonymous function.
-      expect app.render .to-have-been-called-with 'url'
+      expect app.render .to-have-been-called-with { original-url: 'url', cookies:{} }, {}
 
     it "renders the into a provided layout" (done) !->
-      inst.get app, 'app-state', paths: { layouts: support-templates, public: 'dist' }
+      inst.get app, {original-url: 'app-state', cookies:{}}, {}, paths: { layouts: support-templates, public: 'dist' }
       .spread (status, headers, body) ->
         expect body .to-match /^Test /
         expect body .to-match /\ test$/
