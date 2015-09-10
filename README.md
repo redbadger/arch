@@ -54,6 +54,29 @@ arch-cli serve
 
 your application is now running on <http://localhost:3000>.
 
+## Configuration
+
+Arch is configurable by environment variables or a `arch.config.js` / `arch.config.ls` file in your project root.
+
+Hardcoded config (passed to arch.server) takes precedence over environment variables.
+
+##### List of configuration options
+
+| option      | env variable               | description                                             | default                           |
+|-------------|----------------------------|---------------------------------------------------------|-----------------------------------|
+| appPath     | arch_app_path              | absolute path to app directory **                       | your app's package.json directory |
+| archPath    | arch_arch_path             | absolute path to arch directory **                      | arch's package.json directory     |
+| bundle      | arch_bundle                | handle bundling of js in arch                           | true in development               |
+| debug       | arch_debug                 | show debug output                                       | false                             |
+| environment | arch_environment, NODE_ENV | environment for arch to target                          | development                       |
+| minify      | arch_minify                | minify client output                                    | true in production                |
+| public      | arch_public                | asset path (relative to app path)                       | 'dist'                            |
+| port        | arch_port, ARCH_PORT*      | port to listen on                                       | 3000                              |
+| watch       | arch_watch                 | watch for fs changes and reload server + rebuild client | true in development               |
+
+<sub> * Will be deprecated </sub>
+<sub> ** You probably never need to touch this </sub>
+
 ## Documentation
 
 Arch doesn't have a website yet, but you can [read the

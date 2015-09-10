@@ -1,6 +1,6 @@
 {
   "name": "arch",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "Web application framework for React",
   "homepage": "https://github.com/redbadger/arch",
   "repository": {
@@ -40,6 +40,7 @@
     "babel-loader": "^5.1.4",
     "bluebird": "^2.9.27",
     "body-parser": "^1.12.4",
+    "deep-extend": "^0.4.0",
     "express": "^4.12.4",
     "immutable": "^3.7.3",
     "jade": "^1.10.0",
@@ -60,6 +61,7 @@
     "gulp-livescript": "^2.4.0",
     "gulp-load-plugins": "^1.0.0-rc.1",
     "gulp-strip-code": "^0.1.2",
-    "jasmine": "^2.3.1"
+    "jasmine": "^2.3.1",
+    "sinon": "^1.16.1"
   }
 }

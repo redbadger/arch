@@ -1,4 +1,4 @@
-require! <[ bluebird ./cursor ./dom ./routes ./server-rendering lodash/string/unescape ]>
+require! <[ bluebird ./cursor ./dom ./routes ./server/server-rendering lodash/string/unescape ]>
 require! './virtual-dom-utils': 'dom-utils'
 
 {span} = dom
@@ -121,4 +121,3 @@ module.exports =
           body = unless location then React.render-to-string root-element else null
 
           [meta, app-state.deref!, body, location]
-

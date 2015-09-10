@@ -2,7 +2,7 @@
 global.React = require 'react/addons'
 
 # FIXME require server-rendering only on the server
-require! <[ path ./dom ./server-rendering ]>
+require! <[ path ./dom ./server/server-rendering ]>
 
 create-component = (spec) ->
   dom React.create-class spec

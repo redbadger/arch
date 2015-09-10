@@ -1,4 +1,4 @@
-dom-utils = require './virtual-dom-utils'
+dom-utils = require '../virtual-dom-utils'
 {difference, filter, first, keys, Obj} = require 'prelude-ls'
 
 ReactServerRenderingTransaction = require 'react/lib/ReactServerRenderingTransaction'

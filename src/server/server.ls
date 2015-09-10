@@ -2,27 +2,18 @@ require! <[
   express path
   bluebird body-parser
   ../bundler livescript babel/register
+  ../default-config deep-extend
 ]>
 
 { render-body } = require './render'
 
-{each, values, filter, find, flatten, map, first} = require 'prelude-ls'
+{ each, values, filter, find, flatten, map, first } = require 'prelude-ls'
 
-defaults =
-  environment: process.env.NODE_ENV or 'development'
-  port: process.env.ARCH_PORT or 3000
-  paths:
-    app:
-      abs: path.resolve '.'
-      rel: path.relative __dirname, path.resolve '.'
-    arch:
-      abs: path.dirname require.resolve "../../package.json"
-      rel: path.relative (path.resolve '.'), (path.dirname require.resolve "../../package.json")
-    public: 'dist'
+module.exports = (server-options) ->
+  default-options = default-config! # These defaults already have env overwrites applied to them. See default-config.
+  options = deep-extend default-options, server-options
 
-module.exports = (options) ->
-  options = ^^defaults import options
-  app = options.app or require options.paths.app.rel
+  app = require options.app-path
 
   get = (req, res) ->
     console.log "GET", req.original-url
@@ -46,7 +37,7 @@ module.exports = (options) ->
 
   start: (cb) ->
     server = express!
-    .use "/#{options.paths.public}", express.static path.join(options.paths.app.abs, options.paths.public)
+    .use "/#{options.public}", express.static path.join(options.app-path, options.public)
     .use body-parser.urlencoded extended: false
     .get '*', get
     .post '*', post
@@ -55,7 +46,7 @@ module.exports = (options) ->
     # .bundle takes a boolean of whether to watch and can take a callback which
     # allows you to hook into any watch changes.
 
-    bundler.bundle options.paths, options.environment is 'development', (ids) ->
+    bundler.bundle options, (ids) ->
       done = []
       while id = first ids
         parents = require.cache |> values |> filter (-> !(it.id in done) and it.children |> find (.id is id)) |> flatten |> map (.id)
@@ -66,7 +57,7 @@ module.exports = (options) ->
       done |> each -> delete require.cache[it]
 
       try
-        app := require options.paths.app.rel
+        app := require options.app-path
       catch
         console.error 'Error in changed files when restarting server'
 

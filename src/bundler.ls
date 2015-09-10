@@ -1,58 +1,24 @@
-require! <[ webpack path webpack-dev-server ]>
+require! <[ webpack path webpack-dev-server fs deep-extend ]>
+arch-webpack-config = require './webpack.config'
 
 {Obj, keys} = require 'prelude-ls'
 
-exports.bundle = (paths, watch, changed) ->
-  entry = require.resolve paths.app.abs
+exports.bundle = (options, changed) ->
+  base-conf = arch-webpack-config options
+  user-conf = {}
 
-  browser-env = ^^process.env
-  browser-env.ARCH_ENV = 'browser'
-  browser-env = browser-env |> Obj.map JSON.stringify
+  try
+    user-conf = require path.join(options.app-path, 'webpack.config.js')
 
-  # Basic configuration
-  config =
-    entry: [ './' + path.basename entry ]
-
-    context: path.dirname entry
-
-    output:
-      library-target: 'var'
-      library: 'Application'
-      path: path.join paths.app.abs, paths.public
-      filename: 'app.js'
-
-    resolve:
-      root: path.join paths.app.abs, 'node_modules'
-      fallback: path.join paths.arch.abs, 'node_modules'
-      extensions: [ '', '.ls', '.js', '.jsx' ]
-
-    resolve-loader:
-      root: path.join paths.arch.abs, 'node_modules'
-      fallback: path.join paths.app.abs, 'node_modules'
-
-    plugins: [ new webpack.DefinePlugin 'process.env': browser-env ]
-
-    module:
-      pre-loaders: [
-        * test: /\.ls$/
-          loader: 'livescript-loader'
-          exclude: /node_modules/
-        * test: /\.(?:js|jsx)$/
-          loader: 'babel-loader'
-          exclude: /node_modules/
-      ]
-      loaders: []
-      post-loaders: []
-
-    devtool: \source-map
+  config = deep-extend base-conf, user-conf
 
   # Optimise for production.
-  if process.env.NODE_ENV is 'production'
+  if options.minify
     config.plugins.push new webpack.optimize.DedupePlugin!
     config.plugins.push new webpack.optimize.UglifyJsPlugin!
 
   # Enable HMR if watching.
-  if watch
+  if options.watch
     config.entry.unshift 'webpack/hot/dev-server'
     config.entry.unshift 'webpack-dev-server/client?http://localhost:3001'
     config.output.public-path = 'http://localhost:3001/'
@@ -67,7 +33,7 @@ exports.bundle = (paths, watch, changed) ->
   bundler = webpack config
 
   # Just bundle or watch + serve via webpack-dev-server
-  if watch
+  if options.watch
 
     # Add a callback to server, passing changed files, to reload app code server-side.
     last-build = null
@@ -82,7 +48,7 @@ exports.bundle = (paths, watch, changed) ->
     # Start the webpack dev server
     server = new webpack-dev-server bundler, do
       filename: 'app.js'
-      content-base: path.join paths.app.abs, paths.public
+      content-base: path.join options.app-path, options.public
       hot: true # Enable hot loading
       quiet: true
       no-info: false
@@ -92,7 +58,9 @@ exports.bundle = (paths, watch, changed) ->
 
     server.listen 3001, 'localhost'
 
-  else
+  else if options.bundle
     # Run once if watch is false
     bundler.run (err, stats) ->
       console.log 'Bundled app.js'
+  else
+    console.warn "Built-in watch and bundle disabled. Compile your own client bundle!"

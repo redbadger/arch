@@ -13,8 +13,8 @@ exports.stringify-state = -> JSON.stringify it, escape-filter
 
 exports.render-body = (meta, body, app-state, options) ->
   stringify-state = exports.stringify-state
-  bundle-path = if options.environment is 'development' then "http://localhost:3001/app.js" else "/#{options.paths.public}/app.js"
-  arch-body = __template public: options.paths.public, bundle: bundle-path, body: body, state: stringify-state app-state
+  bundle-path = if options.environment is 'development' then "http://localhost:3001/app.js" else "/#{options.public}/app.js"
+  arch-body = __template public: options.public, bundle: bundle-path, body: body, state: stringify-state app-state
 
   {layout, title} = meta
   layout body: arch-body, title: title
