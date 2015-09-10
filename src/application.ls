@@ -1,5 +1,8 @@
 require! <[ bluebird ./cursor ./dom ./routes ./server-rendering lodash/string/unescape ]>
-require! './virtual-dom-utils': 'dom-utils'
+require! {
+  './virtual-dom-utils': 'dom-utils'
+  'lodash/string/unescape': 'unesc'
+}
 
 {span} = dom
 
@@ -55,7 +58,7 @@ module.exports =
         # Initialise app state
 
         state-node = document.get-element-by-id "arch-state"
-        server-state = JSON.parse unescape state-node.text
+        server-state = state-node.text |> unesc |> JSON.parse
 
         app-state = if server-state
           cursor server-state
@@ -121,4 +124,3 @@ module.exports =
           body = unless location then React.render-to-string root-element else null
 
           [meta, app-state.deref!, body, location]
-

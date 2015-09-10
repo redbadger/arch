@@ -56,10 +56,8 @@ describe "server" (_) ->
           title: 'Hello'
 
         spy-on render, 'stringifyState' .and.call-through!
-        spy-on render, 'escapeState' .and.call-through!
         output = render.render-body meta, 'body', { unsafe: '</script><script>alert("xss")</script>' }, paths: { layouts: support-templates, public: 'dist' }
         expect render.stringify-state .to-have-been-called!
-        expect render.escape-state .to-have-been-called!
 
       it "stringifies state to JSON" ->
         state = { a: true, b: false };
@@ -68,7 +66,7 @@ describe "server" (_) ->
 
       it "escapes injected script tags" ->
         state = '</script><script>alert("hi")</script>'
-        expect (render.escape-state state) .not.to-match /^\<\/script>/
+        expect (render.stringify-state state) .not.to-match /^\<\/script>/
 
   describe "form processing" (_) ->
     it "passes through to application's form-processing"
@@ -76,4 +74,3 @@ describe "server" (_) ->
     it "renders into a provided layout"
 
     it "handles a redirect as a 302"
-
